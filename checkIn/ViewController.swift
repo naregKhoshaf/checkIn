@@ -9,6 +9,7 @@
 import UIKit
 import MapKit
 import CoreLocation
+import Alamofire
 
 
 class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate
@@ -20,6 +21,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     
     let locationManager = CLLocationManager()
     // Step 2 of "Configure and use a CLLocationManager object to delever events"
+    
     
     var inRegion = false
     // Tells us if the user is near Intrepid
@@ -45,9 +47,10 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         self.mapView.showsUserLocation = true
         // This is the blue dot of where you are located
         
-        let notificationSettings = UIUserNotificationSettings(forTypes: .Alert, categories: nil)
-        UIApplication.sharedApplication().registerUserNotificationSettings(notificationSettings)
-       
+        let requestTypes = UIUserNotificationType.Alert
+        let settingsRequest = UIUserNotificationSettings(forTypes: requestTypes, categories: nil)
+        UIApplication.sharedApplication().registerUserNotificationSettings(settingsRequest)
+        
     }
 
     override func didReceiveMemoryWarning() {
@@ -59,7 +62,10 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     
     var centerMe: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: 42.367010, longitude: -71.080210)
     
+    
+    
     func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        
         let location = locations.last
         //didUpdateLocations will keep runnng over and over so we want the most current location and thats why we use .last
         print(location)
@@ -97,16 +103,16 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         let intrepidGeoLocation = CLCircularRegion(center:center, radius:radius, identifier:identifier)
         // intrepidGeoLocation is the region in which we want to check if the user is in.
         print(intrepidGeoLocation)
-        //
+        
         print(intrepidGeoLocation.containsCoordinate(centerMe))
         // This lets us know if the user is in the area of Intrepid (intrepidGeoLocation) and returns true if he is and false if he isn't.
         inRegion = intrepidGeoLocation.containsCoordinate(centerMe)
         //This allows us to use notifications
         
-
-        
         if inRegion{
             let notification = UILocalNotification()
+//            let slackSlideAction = UIMutableUserNotificationAction()
+//            slackSlideAction.identifier = slackSlideAction
             notification.fireDate = NSDate(timeIntervalSinceNow: 5)
             notification.alertBody = "Near Intrepid"
             notification.alertAction = "Check In"
@@ -115,9 +121,28 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
             
             UIApplication.sharedApplication().scheduleLocalNotification(notification)
             print("Notification works")
+            
+            //new code
+            
+            let parameters = [
+                "foo": "bar",
+                "baz": ["a", 1],
+                "qux": [
+                    "x": 1,
+                    "y": 2,
+                    "z": 3
+                ]
+            ]
+            
+            Alamofire.request(.POST, "https://httpbin.org/post", parameters: parameters)
+            
+            
         }
         
     }
+    // Create a notifcation that has 2 buttons that say cancel or checkin
+    // Download Cocoapods
+    // Use alamofire to post on the slack api webook channel called #whose-there
     
     
 
