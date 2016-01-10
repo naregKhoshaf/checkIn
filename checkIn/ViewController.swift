@@ -14,8 +14,10 @@ import Alamofire
 
 class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate
     // I am abiding by these protocols
+    
 {
 
+    var centerMe: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: 42.367010, longitude: -71.080210)
     @IBOutlet weak var mapView: MKMapView!
     // I control dragged the map in the view here and assigned it the name "mapView"
     
@@ -31,9 +33,10 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     {
         super.viewDidLoad()
         
-        self.locationManager.delegate = self
+        locationManager.delegate = self
         // This conforms it to the delegate method
         // Step 3 of "Configure and use a CLLocationManager object to delever events"
+        // Delegating the locationManger to myself
         self.locationManager.desiredAccuracy = kCLLocationAccuracyBest
         //setting desiredAccuracy set to AccuracyBest because we want exact location.
         
@@ -47,20 +50,14 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         self.mapView.showsUserLocation = true
         // This is the blue dot of where you are located
         
-        let requestTypes = UIUserNotificationType.Alert
-        let settingsRequest = UIUserNotificationSettings(forTypes: requestTypes, categories: nil)
-        UIApplication.sharedApplication().registerUserNotificationSettings(settingsRequest)
-        
+ 
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
+
     
     // Mark: - location Delegate Methods
     
-    var centerMe: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: 42.367010, longitude: -71.080210)
+    
     
     
     
@@ -95,8 +92,8 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     {
         // 42.367010 -71.080210 Intrepid Pursuits: 222 Third St #4000, Cambridge, MA 02141
         // 37.785863 -122.406541 Apple Store in SF: 1 Stockton St, San Francisco, CA
-        let latitude: CLLocationDegrees = 37.785863
-        let longitude: CLLocationDegrees = -122.406541
+        let latitude: CLLocationDegrees = 37.33233141
+        let longitude: CLLocationDegrees = -122.03121860
         let center: CLLocationCoordinate2D = CLLocationCoordinate2DMake(latitude, longitude)
         let radius: CLLocationDistance = CLLocationDistance(50.0)
         let identifier: String = "intrepid"
@@ -110,39 +107,27 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         //This allows us to use notifications
         
         if inRegion{
-            let notification = UILocalNotification()
-//            let slackSlideAction = UIMutableUserNotificationAction()
-//            slackSlideAction.identifier = slackSlideAction
-            notification.fireDate = NSDate(timeIntervalSinceNow: 5)
-            notification.alertBody = "Near Intrepid"
-            notification.alertAction = "Check In"
-            notification.soundName = UILocalNotificationDefaultSoundName
-            notification.userInfo = ["customField1": "someValue"]
+
             
-            UIApplication.sharedApplication().scheduleLocalNotification(notification)
-            print("Notification works")
-            
-            //new code
-            
-            let parameters = [
-                "foo": "bar",
-                "baz": ["a", 1],
-                "qux": [
-                    "x": 1,
-                    "y": 2,
-                    "z": 3
+            let alertController = UIAlertController(title: "Check In", message: "Let people know you are here", preferredStyle: .Alert)
+            let defaultAction = UIAlertAction(title: "OK", style: .Default) { (action) in
+                print("YO")
+                let parameters = [
+                    "text": "I'M HERE!"
                 ]
-            ]
-            
-            Alamofire.request(.POST, "https://httpbin.org/post", parameters: parameters)
-            
+                
+                Alamofire.request(.POST, "https://hooks.slack.com/services/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", parameters: parameters, encoding: .JSON)
+            }
+            let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel, handler: nil)
+            alertController.addAction(defaultAction)
+            alertController.addAction(cancelAction)
+            self.presentViewController(alertController, animated: true, completion: nil )
+            print("Notification works")
             
         }
         
     }
-    // Create a notifcation that has 2 buttons that say cancel or checkin
-    // Download Cocoapods
-    // Use alamofire to post on the slack api webook channel called #whose-there
+    
     
     
 
